@@ -1,5 +1,6 @@
 # Data files
 *.csv
+*.zip
 
 # Generated images or documents
 *.pdf
