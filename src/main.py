@@ -2,6 +2,7 @@ from constants import *
 from estimate.estimator import Estimator
 
 if __name__ == '__main__':
-    est = Estimator()
+    est = Estimator(TICKER, DATE)
     est.load_data(DATABASE, FILENAME, COMPRESSION, COLUMNS, PARSE_DATES)
-    print est.df.dtypes
+    est.crop_date(START, END)
+    est.estimate_covariance()
