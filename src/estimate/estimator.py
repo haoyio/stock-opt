@@ -60,7 +60,7 @@ class Estimator(object):
                 datetime(year=s[0], month=s[1], day=s[2])) & \
             (self.df[self.date] < \
                 datetime(year=e[0], month=e[1], day=e[2]))]
-        self.df.reset_index(drop=True)
+        self.df = self.df.reset_index(drop=True)
 
         # find list of stocks that exist between |start| and |end|
         stix = set(self.df[self.df[self.date] == \
@@ -68,17 +68,18 @@ class Estimator(object):
         etix = set(self.df[self.df[self.date] == \
                    self.df[self.date].max()][self.ticker].values)
         tickers = stix.intersection(etix)
+        print 'INFO: the ticker values are ' + str(tickers)
 
         # filter out stocks that did not exist between |start| and |end|
-        self.df[self.df[self.ticker].isin(tickers)]
-        self.df.reset_index(drop=True)
+        self.df = self.df[self.df[self.ticker].isin(tickers)]
+        self.df = self.df.reset_index(drop=True)
 
-    def estimate_covariance(self):
+    def estimate_covariance(self, column):
         ''' Covariance estimation
 
         Various methods to compute the covariance between stocks in |self.df|
-        using the closing price for each day to find the return between
-        consecutive days:
+        using the |column| price (e.g,. closing) for each day to find the
+        return between consecutive days:
             1) self.ml: maximum likelihood covariance estimate
             2) self.sh: covariance estimate with shrinkage
             3) self.lw: Ledoit-Wolf shrinkage estimate
@@ -86,6 +87,15 @@ class Estimator(object):
         '''
         if self.df is None:
             raise ValueError('No data loaded.')
+        elif column not in self.df.columns:
+            raise ValueError(column + ' is not a valid database column name.')
 
         print 'INFO: Estimating covariance matrices'
-        # TODO: create a matrix with shape (n_samples, n_tickers)
+
+        tickers = sorted(list(set(self.df[self.ticker].values)))
+        dates = sorted(list(set(self.df[self.date].values)))
+
+        prices = []
+        for date in dates:
+            for ticker in tickers:
+                pass

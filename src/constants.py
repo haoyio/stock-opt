@@ -6,6 +6,7 @@ TICKER = 'ticker'
 DATE = 'date'
 START = '2006-06-17'
 END = '2016-06-17'
+COVARIANCE_COLUMN = 'close'
 
 COLUMNS = [
     'ticker',
