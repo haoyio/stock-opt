@@ -4,8 +4,8 @@ COMPRESSION = 'zip'
 PARSE_DATES = [1]
 TICKER = 'ticker'
 DATE = 'date'
-START = '2006-06-17'
-END = '2016-06-17'
+START = '2012-06-01'
+END = '2016-06-01'
 COVARIANCE_COLUMN = 'close'
 
 COLUMNS = [
