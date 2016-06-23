@@ -5,7 +5,7 @@ import time
 
 from datetime import datetime
 from sklearn.covariance import LedoitWolf, OAS, ShrunkCovariance, \
-    empirical_covariance, log_likelihood
+    EmpiricalCovariance
 from sklearn.grid_search import GridSearchCV
 
 DATELEN = 10

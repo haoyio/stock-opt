@@ -7,12 +7,14 @@ class Estimator(object):
         self.date = date_column # column name for timestamps; e.g., 'date'
 
         self.df = None # stock price dataframe
-        self.returns = None # mean return estimate
+        self.mean_log = None # mean return estimate using log(p_t/p_t-1)
+        self.mean_std = None # mean return estimate using (p_t-p_t-1)/p_t-1
 
-        self.ml = None # maximum likelihood covariance estimate
-        self.sh = None # covariance estimate with shrinkage
-        self.lw = None # Ledoit-Wolf shrinkage estimate
-        self.oa = None # oracle approximating shrinkage estimate
+        self.cov_ml = None # maximum likelihood covariance estimate
+        self.cov_sh = None # covariance estimate with shrinkage
+        self.cov_lw = None # Ledoit-Wolf shrinkage estimate
+        self.cov_oa = None # oracle approximating shrinkage estimate
+        self.mc = None # minimum covariance determinant estimate
 
     def load_data(
             self,
@@ -69,27 +71,25 @@ class Estimator(object):
                    self.df[self.date].max()][self.ticker].values)
         tickers = stix.intersection(etix)
 
-        print 'INFO: a total of ' + str(len(tickers)) + \
+        print 'INFO: ' + str(len(tickers)) + \
             ' tickers exist between ' + start + ' and ' + end
 
         # filter out stocks that did not exist between |start| and |end|
         self.df = self.df[self.df[self.ticker].isin(tickers)]
         self.df = self.df.reset_index(drop=True)
 
-    def estimate_mean(self, column):
-        ''' Mean estimation. '''
-        pass
+    def estimate_mean_covariance(self, column):
+        ''' Mean and covariance estimation.
 
-    def estimate_covariance(self, column):
-        ''' Covariance estimation.
+        Mean is computed using the natural log
 
         Various methods to compute the covariance between stocks in |self.df|
         using the |column| price (e.g,. closing) for each day to find the
         return between consecutive days:
-            1) self.ml: maximum likelihood covariance estimate
-            2) self.sh: covariance estimate with shrinkage
-            3) self.lw: Ledoit-Wolf shrinkage estimate
-            4) self.oa: oracle approximating shrinkage estimate
+            1) self.cov_ml: maximum likelihood covariance estimate
+            2) self.cov_sh: covariance estimate with shrinkage
+            3) self.cov_lw: Ledoit-Wolf shrinkage estimate
+            4) self.cov_oa: oracle approximating shrinkage estimate
         '''
         if self.df is None:
             raise ValueError('No data loaded.')
@@ -124,39 +124,65 @@ class Estimator(object):
         print 'INFO: Return percent changes computed in ' + \
             str(int((time.clock() - start_time) / 60)) + ' min'
 
+        print 'INFO: Estimating mean returns...'
+        start_time = time.clock()
+
+        dfm_log = np.log(dfc / dfc.shift())
+        dfm_log = dfm_log.dropna().reset_index(drop=True)
+
+        mean_log_list = [dfm_log[ticker].mean() for ticker in tickers]
+        self.mean_log = np.array(mean_log_list)
+        print self.mean_log
+
+        dfm_std = (dfc - dfc.shift()) / dfc.shift()
+        dfm_std = dfm_std.dropna().reset_index(drop=True)
+
+        mean_std_list = [dfm_std[ticker].mean() for ticker in tickers]
+        self.mean_std = np.array(mean_std_list)
+        print self.mean_std
+
+        print 'INFO: Mean return vectors computed in ' + \
+            str(int(time.clock() - start_time)) + ' sec'
+
         print 'INFO: Estimating covariance matrices...'
         start_time = time.clock()
         part_time = time.clock()
 
+        dfc = (dfc - dfc.shift()) / dfc.shift()
+        dfc = dfc.dropna().reset_index(drop=True)
         x = dfc.values
 
-        self.ml = empirical_covariance(x)
-        print '\tmaximum-likelihood covariance computed in ' + \
+        ml = EmpiricalCovariance().fit(x)
+        self.cov_ml = ml.covariance_
+        print 'INFO: maximum-likelihood covariance computed in ' + \
             str(int(time.clock() - part_time)) + ' sec'
         part_time = time.clock()
+
+        print self.cov_ml
 
         sh = ShrunkCovariance().fit(x)
-        self.sh = sh.covariance_
-        print '\tshrunk covariance computed in ' + \
+        self.cov_sh = sh.covariance_
+        print 'INFO: shrunk covariance computed in ' + \
             str(int(time.clock() - part_time)) + ' sec'
         part_time = time.clock()
+
+        print self.cov_sh
 
         lw = LedoitWolf().fit(x)
-        self.lw = lw.covariance_
-        print '\tLedoit-Wolf covariance computed in ' + \
+        self.cov_lw = lw.covariance_
+        print 'INFO: Ledoit-Wolf covariance computed in ' + \
             str(int(time.clock() - part_time)) + ' sec'
         part_time = time.clock()
+
+        print self.cov_lw
 
         oa = OAS().fit(x)
-        self.oa = oa.covariance_
-        print '\toracle approximating shrunk covariance computed in ' + \
+        self.cov_oa = oa.covariance_
+        print 'INFO: oracle approximating shrunk covariance computed in ' + \
             str(int(time.clock() - part_time)) + ' sec'
         part_time = time.clock()
 
-        print self.ml
-        print self.sh
-        print self.lw
-        print self.oa
+        print self.cov_oa
 
         print 'INFO: Covariance estimators computed in ' + \
             str(int(time.clock() - start_time)) + ' sec'
