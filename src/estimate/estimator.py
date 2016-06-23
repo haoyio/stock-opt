@@ -14,7 +14,6 @@ class Estimator(object):
         self.cov_sh = None # covariance estimate with shrinkage
         self.cov_lw = None # Ledoit-Wolf shrinkage estimate
         self.cov_oa = None # oracle approximating shrinkage estimate
-        self.mc = None # minimum covariance determinant estimate
 
     def load_data(
             self,
