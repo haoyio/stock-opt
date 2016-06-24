@@ -31,4 +31,8 @@ if __name__ == '__main__':
     est.crop_date(start='2012-06-01', end='2016-06-01')
     est.estimate_mean_covariance(column='close')
 
-    opt = Optimizer(est.)
+    opt = Optimizer(est.mean_log, est.cov_ml); opt.solve()
+    opt.cov = est.cov_sh; opt.solve()
+    opt.cov = est.cov_lw; opt.solve()
+    opt.cov = est.cov_oa; opt.solve()
+    opt.show()
