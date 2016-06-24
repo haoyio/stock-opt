@@ -80,7 +80,7 @@ class Estimator(object):
     def estimate_mean_covariance(self, column):
         ''' Mean and covariance estimation.
 
-        Mean is computed using the natural log
+        Mean is computed using the arithmetic and log differences.
 
         Various methods to compute the covariance between stocks in |self.df|
         using the |column| price (e.g,. closing) for each day to find the
@@ -138,7 +138,7 @@ class Estimator(object):
 
         mean_std_list = [dfm_std[ticker].mean() for ticker in tickers]
         self.mean_std = np.array(mean_std_list)
-        print self.mean_std
+        print self.mean_std.shape
 
         print 'INFO: Mean return vectors computed in ' + \
             str(int(time.clock() - start_time)) + ' sec'
