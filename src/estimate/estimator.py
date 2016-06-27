@@ -95,7 +95,7 @@ class Estimator(object):
         elif column not in self.df.columns:
             raise ValueError(column + ' is not a valid database column name.')
 
-        print 'INFO: Computing return percent changes...'
+        print 'INFO: Reorganizing DataFrame...'
         start_time = time.clock()
 
         tickers = sorted(list(set(self.df[self.ticker].values)))
@@ -120,7 +120,7 @@ class Estimator(object):
         dfc = pd.DataFrame(price_list).dropna().reset_index(drop=True)
         dfc.columns = tickers
 
-        print 'INFO: Return percent changes computed in ' + \
+        print 'INFO: DataFrame reorganized in ' + \
             str(int((time.clock() - start_time) / 60)) + ' min'
 
         print 'INFO: Estimating mean returns...'

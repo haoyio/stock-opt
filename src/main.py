@@ -2,10 +2,7 @@ from estimate.estimator import Estimator
 from optimize.optimizer import Optimizer
 
 if __name__ == '__main__':
-    est = Estimator(
-        ticker_column='ticker',
-        date_column='date')
-
+    est = Estimator(ticker_column='ticker', date_column='date')
     est.load_data(
         database='WIKI',
         filename='../data/wiki.zip',
